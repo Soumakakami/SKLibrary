@@ -93,6 +93,55 @@ namespace SKLibrary.Unity
 				_self.Add(_add);
 			}
 		}
+
+		/// <summary>
+		/// リストの中から引数に一番近い数値を取得
+		/// </summary>
+		/// <param name="_self">int型List</param>
+		/// <param name="_value">近い値</param>
+		/// <returns></returns>
+		public static int Nearest(this List<int> _self,int _value)
+		{
+			int value = 0;
+
+			int standard = Mathf.Abs(_value-_self[0]);
+
+			foreach (int item in _self)
+			{
+				if (Mathf.Abs(_value - item) <= standard)
+				{
+					value = item;
+					standard = Mathf.Abs(_value - item);
+				}
+			}
+
+			return value;
+		}
+
+		/// <summary>
+		/// リストの中から引数に一番近い数値を取得
+		/// </summary>
+		/// <param name="_self">float型List</param>
+		/// <param name="_value">近い値</param>
+		/// <returns></returns>
+		public static float Nearest(this List<float> _self, float _value)
+		{
+			float value = 0;
+
+			float standard = Mathf.Abs(_value - _self[0]);
+
+			foreach (float item in _self)
+			{
+				if (Mathf.Abs(_value - item) <= standard)
+				{
+					value = item;
+					
+					standard = Mathf.Abs(_value - item);
+				}
+			}
+
+			return value;
+		}
 	}
 	/// <summary>
 	/// ゲームオブジェクトを拡張する場合ここに記述
@@ -156,9 +205,26 @@ namespace SKLibrary.Unity
 	{
 		public static void ArrayLog<T>(T[]_self)
 		{
-			for (int i = 0; i < _self.Length; i++)
+			int i = 0;
+			foreach (var item in _self)
 			{
-				Debug.Log("["+i+"]要素目    "+_self[i]);
+				Debug.Log("[" + i + "]要素目    " + _self[i]);
+				i++;
+			}
+		}
+
+		public static void ArrayLog<T>(T[,] _self)
+		{
+			string str = "";
+			for (int i = 0; i < _self.GetLength(0); i++)
+			{
+				str += "[要素"+i+"列目]:";
+				for (int j = 0; j < _self.GetLength(1); j++)
+				{
+					str += _self[i, j]+":";
+				}
+				Debug.Log(str);
+				str = "";
 			}
 		}
 	}
@@ -205,9 +271,9 @@ namespace SKLibrary.SaveAndLoad
 				savePath = Application.persistentDataPath + BASE_FOLDER_NAME;
 			}
 
-#if UNITY_EDITOR
+		#if UNITY_EDITOR || UNITY_STANDALONE_WIN
 			savePath = Application.dataPath + BASE_FOLDER_NAME;
-#endif
+		#endif
 
 			// セーブパス + SaveManager/
 			savePath = savePath + _folderName + "/";
@@ -299,10 +365,14 @@ namespace SKLibrary.SaveAndLoad
 
 			return returnObject;
 		}
+
+		public static int ReadFiles(string _folderName = DEFAULT_FOLDER_NAME, string _extension="*.binary")
+		{
+			int count=0;
+			string savePath = CreateSavePath(_folderName);
+			count = Directory.GetFiles(savePath, "*.binary", SearchOption.AllDirectories).Length;
+			return count;
+		}
 	}
 
 }
-
-
-
-
