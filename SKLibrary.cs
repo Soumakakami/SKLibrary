@@ -2,6 +2,8 @@
 using UnityEngine;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SKLibrary
 {
@@ -317,12 +319,135 @@ namespace SKLibrary.SaveAndLoad
 			return returnObject;
 		}
 
+		/// <summary>
+		/// 指定したフォルダにどれだけファイルがあるか
+		/// </summary>
+		/// <param name="_folderName">フォルダ名</param>
+		/// <param name="_extension">拡張子(例:*.binary)</param>
+		/// <returns></returns>
 		public static int ReadFiles(string _folderName = DEFAULT_FOLDER_NAME, string _extension="*.binary")
 		{
 			int count=0;
 			string savePath = CreateSavePath(_folderName);
 			count = Directory.GetFiles(savePath, "*.binary", SearchOption.AllDirectories).Length;
 			return count;
+		}
+
+
+
+
+		public const string savePath = "./date.binary";
+		private const string _password = "passwordstring";
+		private const string _salt = "saltstring";
+		static private RijndaelManaged _rijindeal;
+
+		static SaveLoadSystem()
+		{
+			_rijindeal = new RijndaelManaged();
+			_rijindeal.KeySize = 128;
+			_rijindeal.BlockSize = 128;
+
+			byte[] bsalt = Encoding.UTF8.GetBytes(_salt);
+			Rfc2898DeriveBytes deriveBytes = new Rfc2898DeriveBytes(_password, bsalt);
+			deriveBytes.IterationCount = 1000;
+
+			_rijindeal.Key = deriveBytes.GetBytes(_rijindeal.KeySize / 8);
+			_rijindeal.IV = deriveBytes.GetBytes(_rijindeal.BlockSize / 8);
+		}
+
+		static public void EncryptionSave(object _saveData, string _fileName, string _folderName = DEFAULT_FOLDER_NAME)
+		{
+			//メモリーストーリーム作成
+			MemoryStream stream = new MemoryStream();
+
+			//バイナリフォーマッターを作成
+			BinaryFormatter formatter = new BinaryFormatter();
+
+			//セーブパスを決める
+			string savePath = CreateSavePath(_folderName);
+
+			//ファイル名を決める
+			string saveFileName = SaveFileName(_fileName);
+
+
+
+			//					↓書き込み先 ↓シリアル化したクラス
+			formatter.Serialize(stream, _saveData);
+
+			//バイナリ配列として保存
+			byte[] source = stream.ToArray();
+
+			//AES暗号化
+			source = AESlize(source);
+
+			//ディレクトリがあるか確認、なければ作成
+			if (!Directory.Exists(savePath))
+			{
+				Directory.CreateDirectory(savePath);
+			}
+			//ファイル作成
+			FileStream saveFile = File.Create(savePath + saveFileName);
+
+			//オブジェクトをシリアル化しディスク上にファイル書き込み
+			saveFile.Write(source,0,source.Length);
+
+			//書き込み終了
+			saveFile.Close();
+
+		}
+
+		static public object EncryptionLoad(string _fileName, string _folderName = DEFAULT_FOLDER_NAME)
+		{
+			object data = null;
+
+			//セーブパスを決める
+			string savePath = CreateSavePath(_folderName);
+
+			//バイナリファイル名を取得
+			string saveFileName = savePath + SaveFileName(_fileName);
+
+			FileStream stream = new FileStream(saveFileName, FileMode.Open, FileAccess.Read);
+			MemoryStream memStream = new MemoryStream();
+				
+			const int size = 4096;
+			byte[] buffer = new byte[size];
+			int numBytes;
+
+			while ((numBytes = stream.Read(buffer, 0, size)) > 0)
+			{
+				memStream.Write(buffer, 0, numBytes);
+			}
+
+			byte[] source = memStream.ToArray();
+			source = DeAESlize(source);
+
+			MemoryStream memStream2 = new MemoryStream(source);
+			
+			BinaryFormatter formatter = new BinaryFormatter();
+			data = formatter.Deserialize(memStream2) as object;
+
+			return data;
+		}
+
+		static private byte[] AESlize(byte[] data)
+		{
+			ICryptoTransform encryptor = _rijindeal.CreateEncryptor();
+			byte[] encrypted = encryptor.TransformFinalBlock(data, 0, data.Length);
+
+			encryptor.Dispose();
+
+			// Console.WriteLine(string.Join(" ", encrypted));
+
+			return encrypted;
+		}
+		static private byte[] DeAESlize(byte[] data)
+		{
+			ICryptoTransform decryptor = _rijindeal.CreateDecryptor();
+			byte[] plain = decryptor.TransformFinalBlock(data, 0, data.Length);
+
+			// Console.WriteLine(string.Join(" ", plain));
+
+			return plain;
 		}
 	}
 
