@@ -93,55 +93,6 @@ namespace SKLibrary.Unity
 				_self.Add(_add);
 			}
 		}
-
-		/// <summary>
-		/// リストの中から引数に一番近い数値を取得
-		/// </summary>
-		/// <param name="_self">int型List</param>
-		/// <param name="_value">近い値</param>
-		/// <returns></returns>
-		public static int Nearest(this List<int> _self,int _value)
-		{
-			int value = 0;
-
-			int standard = Mathf.Abs(_value-_self[0]);
-
-			foreach (int item in _self)
-			{
-				if (Mathf.Abs(_value - item) <= standard)
-				{
-					value = item;
-					standard = Mathf.Abs(_value - item);
-				}
-			}
-
-			return value;
-		}
-
-		/// <summary>
-		/// リストの中から引数に一番近い数値を取得
-		/// </summary>
-		/// <param name="_self">float型List</param>
-		/// <param name="_value">近い値</param>
-		/// <returns></returns>
-		public static float Nearest(this List<float> _self, float _value)
-		{
-			float value = 0;
-
-			float standard = Mathf.Abs(_value - _self[0]);
-
-			foreach (float item in _self)
-			{
-				if (Mathf.Abs(_value - item) <= standard)
-				{
-					value = item;
-					
-					standard = Mathf.Abs(_value - item);
-				}
-			}
-
-			return value;
-		}
 	}
 	/// <summary>
 	/// ゲームオブジェクトを拡張する場合ここに記述
@@ -376,3 +327,7 @@ namespace SKLibrary.SaveAndLoad
 	}
 
 }
+
+
+
+
