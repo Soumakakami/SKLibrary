@@ -46,7 +46,6 @@ namespace SKLibrary
 		}
 
 	}
-
 }
 
 /// <summary>
@@ -55,7 +54,7 @@ namespace SKLibrary
 namespace SKLibrary.Unity
 {
 	/// <summary>
-	/// ListをUnity用に拡張する場合ここに記述
+	/// ListをUnity用に拡張
 	/// </summary>
 	public static class ListExtension
 	{
@@ -97,7 +96,7 @@ namespace SKLibrary.Unity
 		}
 	}
 	/// <summary>
-	/// ゲームオブジェクトを拡張する場合ここに記述
+	/// ゲームオブジェクトを拡張
 	/// </summary>
 	public static class GameObjectExtension
 	{
@@ -152,7 +151,7 @@ namespace SKLibrary.Unity
 
 	}
 	/// <summary>
-	/// 独自のDebugを追加する場合ここに記述
+	/// 独自のDebugを追加
 	/// </summary>
 	public static class DebugLog
 	{
@@ -181,6 +180,49 @@ namespace SKLibrary.Unity
 			}
 		}
 	}
+	/// <summary>
+	/// レンダラーテクスチャを拡張
+	/// </summary>
+	public static class RenderTextuerExtension
+	{
+		/// <summary>
+		/// レンダラーテクスチャからテクスチャ2Dを生成する(かなり重たい処理なので使用には注意)
+		/// </summary>
+		/// <param name="_self">自身</param>
+		/// <param name="mainCamera">どのカメラの映像か</param>
+		/// <returns></returns>
+		public static Texture2D CreateTexture2D(this RenderTexture _self,Camera mainCamera)
+		{
+			//Texture2Dを作成
+			Texture2D texture2D = new Texture2D(_self.width, _self.height, TextureFormat.ARGB32, false, false);
+
+			//subCameraにRenderTextureを入れる
+			mainCamera.targetTexture = _self;
+
+			//手動でカメラをレンダリングします
+			mainCamera.Render();
+
+
+			RenderTexture.active = _self;
+			texture2D.ReadPixels(new Rect(0, 0, _self.width, _self.height), 0, 0);
+			texture2D.Apply();
+
+			//元に戻す別のカメラを用意してそれをRenderTexter用にすれば下のコードはいらないです。
+			mainCamera.targetTexture = null;
+			RenderTexture.active = null;
+
+			return texture2D;
+		}
+	}
+
+	public static class Texture2DExtension
+	{
+		public static Sprite CreateSprite(this Texture2D tex2D)
+		{
+			Sprite sprite = Sprite.Create(tex2D, new Rect(0f, 0f, tex2D.width, tex2D.height), new Vector2(0.5f, 0.5f), 100f);
+			return sprite;
+		}
+	}
 
 	/// <summary>
 	/// Unity.Engine.GameObjectではない独自のGameObject
@@ -192,7 +234,7 @@ namespace SKLibrary.Unity
 }
 
 /// <summary>
-/// セーブとロードを行える
+/// セーブ&ロード機能
 /// </summary>
 namespace SKLibrary.SaveAndLoad
 {
@@ -334,13 +376,17 @@ namespace SKLibrary.SaveAndLoad
 		}
 
 
-
-
+		/// <summary>
+		/// 暗号化
+		/// </summary>
 		public const string savePath = "./date.binary";
 		private const string _password = "passwordstring";
 		private const string _salt = "saltstring";
 		static private RijndaelManaged _rijindeal;
-
+		
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
 		static SaveLoadSystem()
 		{
 			_rijindeal = new RijndaelManaged();
@@ -355,6 +401,12 @@ namespace SKLibrary.SaveAndLoad
 			_rijindeal.IV = deriveBytes.GetBytes(_rijindeal.BlockSize / 8);
 		}
 
+		/// <summary>
+		/// 暗号化したセーブ
+		/// </summary>
+		/// <param name="_saveData">保存したいデータ</param>
+		/// <param name="_fileName">ファイル名</param>
+		/// <param name="_folderName">フォルダ名</param>
 		static public void EncryptionSave(object _saveData, string _fileName, string _folderName = DEFAULT_FOLDER_NAME)
 		{
 			//メモリーストーリーム作成
@@ -396,6 +448,12 @@ namespace SKLibrary.SaveAndLoad
 
 		}
 
+		/// <summary>
+		/// 暗号化したデータをロード
+		/// </summary>
+		/// <param name="_fileName">ロードしたいファイル名</param>
+		/// <param name="_folderName">フォルダ名</param>
+		/// <returns></returns>
 		static public object EncryptionLoad(string _fileName, string _folderName = DEFAULT_FOLDER_NAME)
 		{
 			object data = null;
@@ -405,6 +463,20 @@ namespace SKLibrary.SaveAndLoad
 
 			//バイナリファイル名を取得
 			string saveFileName = savePath + SaveFileName(_fileName);
+
+
+			//Saveディレクトリまたはバイナリファイルが存在しない場合
+			if (!Directory.Exists(savePath))
+			{
+				Debug.LogError("ディレクトリが見つかりませんでした");
+				return null;
+			}
+			if (!File.Exists(saveFileName))
+			{
+				Debug.LogError("ファイルが見つかりませんでした");
+				return null;
+			}
+
 
 			FileStream stream = new FileStream(saveFileName, FileMode.Open, FileAccess.Read);
 			MemoryStream memStream = new MemoryStream();
@@ -436,8 +508,6 @@ namespace SKLibrary.SaveAndLoad
 
 			encryptor.Dispose();
 
-			// Console.WriteLine(string.Join(" ", encrypted));
-
 			return encrypted;
 		}
 		static private byte[] DeAESlize(byte[] data)
@@ -445,14 +515,7 @@ namespace SKLibrary.SaveAndLoad
 			ICryptoTransform decryptor = _rijindeal.CreateDecryptor();
 			byte[] plain = decryptor.TransformFinalBlock(data, 0, data.Length);
 
-			// Console.WriteLine(string.Join(" ", plain));
-
 			return plain;
 		}
 	}
-
 }
-
-
-
-
