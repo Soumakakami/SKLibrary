@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using System.Linq;
+using UnityEngine;
 
 namespace SKLibrary
 {
@@ -30,8 +31,7 @@ namespace SKLibrary
 		/// <returns></returns>
 		public static bool RandomBool()
 		{
-			bool boolean = (int)UnityEngine.Random.Range(0, 2) == 0 ? true : false;
-			return boolean;
+			return Random.Range(0, 2) == 0 ? true : false;
 		}
 
 		/// <summary>
@@ -53,6 +53,7 @@ namespace SKLibrary
 /// </summary>
 namespace SKLibrary.Unity
 {
+	//--------------------------------ここから下は拡張--------------------------------
 	/// <summary>
 	/// ListをUnity用に拡張
 	/// </summary>
@@ -95,6 +96,7 @@ namespace SKLibrary.Unity
 			}
 		}
 	}
+
 	/// <summary>
 	/// ゲームオブジェクトを拡張
 	/// </summary>
@@ -108,17 +110,10 @@ namespace SKLibrary.Unity
 		/// <returns></returns>
 		public static GameObject GetClosestObjectList(this GameObject _self,List<GameObject> _list)
 		{
-			GameObject gameObject=_list[0];
-			float dis=Vector3.Distance(_self.transform.position,_list[0].transform.position);
-			for (int i = 1; i < _list.Count; i++)
-			{
-				if (Vector3.Distance(_self.transform.position,_list[i].transform.position)<=dis)
-				{
-					dis = Vector3.Distance(_self.transform.position, _list[i].transform.position);
-					gameObject = _list[i];
-				}
-			}
-			return gameObject;
+			return _list
+				.OrderBy(x => (x.transform.position - _self.transform.position).magnitude)
+				.First().gameObject;
+
 		}
 		/// <summary>
 		/// 自身から一番近い位置のオブジェクトを返します
@@ -128,17 +123,9 @@ namespace SKLibrary.Unity
 		/// <returns></returns>
 		public static GameObject GetClosestObjectArray(this GameObject _self, GameObject[] _array)
 		{
-			GameObject gameObject = _array[0];
-			float dis = Vector3.Distance(_self.transform.position, _array[0].transform.position);
-			for (int i = 1; i < _array.Length; i++)
-			{
-				if (Vector3.Distance(_self.transform.position, _array[i].transform.position) <= dis)
-				{
-					dis = Vector3.Distance(_self.transform.position, _array[i].transform.position);
-					gameObject = _array[i];
-				}
-			}
-			return gameObject;
+			return _array
+				.OrderBy(x => (x.transform.position - _self.transform.position).magnitude)
+				.First().gameObject;
 		}
 		/// <summary>
 		/// 拡張メソッドでも自身を破壊できるようにする
@@ -148,38 +135,30 @@ namespace SKLibrary.Unity
 		{
 			GameObject.Destroy(_self);
 		}
-
-	}
-	/// <summary>
-	/// 独自のDebugを追加
-	/// </summary>
-	public static class DebugLog
-	{
-		public static void ArrayLog<T>(T[]_self)
+		/// <summary>
+		/// コンポーネントを取得(なければ追加)
+		/// </summary>
+		public static T GetOrAddComponent<T>(this GameObject _self) where T : Component
 		{
-			int i = 0;
-			foreach (var item in _self)
-			{
-				Debug.Log("[" + i + "]要素目    " + _self[i]);
-				i++;
-			}
+			return _self.GetComponent<T>() ?? _self.AddComponent<T>();
 		}
 
-		public static void ArrayLog<T>(T[,] _self)
+		/// <summary>
+		/// 全ての子オブジェクトを返します
+		/// </summary>
+		/// <param name="self">自身</param>
+		/// <param name="includeInactive">非アクティブのオブジェクトの取得するか</param>
+		/// <returns></returns>
+		public static GameObject[] GetChildren(this GameObject _self, bool includeInactive = false)
 		{
-			string str = "";
-			for (int i = 0; i < _self.GetLength(0); i++)
-			{
-				str += "[要素"+i+"列目]:";
-				for (int j = 0; j < _self.GetLength(1); j++)
-				{
-					str += _self[i, j]+":";
-				}
-				Debug.Log(str);
-				str = "";
-			}
+			return _self
+				.GetComponentsInChildren<GameObject>(includeInactive)
+				.Where(x => x != _self.transform)
+				.Select(x => x.gameObject)
+				.ToArray();
 		}
 	}
+
 	/// <summary>
 	/// レンダラーテクスチャを拡張
 	/// </summary>
@@ -215,6 +194,9 @@ namespace SKLibrary.Unity
 		}
 	}
 
+	/// <summary>
+	/// テクスチャ2Dを拡張
+	/// </summary>
 	public static class Texture2DExtension
 	{
 		public static Sprite CreateSprite(this Texture2D tex2D)
@@ -223,13 +205,72 @@ namespace SKLibrary.Unity
 			return sprite;
 		}
 	}
+	//--------------------------------ここから上は拡張--------------------------------
 
 	/// <summary>
-	/// Unity.Engine.GameObjectではない独自のGameObject
+	/// 独自のGameObject
 	/// </summary>
 	public static class GameObjectUtils
 	{
 
+	}
+
+	/// <summary>
+	/// 独自のRandom
+	/// </summary>
+	public static class RandomUtils
+	{
+		/// <summary>
+		/// 配列の中の要素をランダムで返す
+		/// </summary>
+		public static T RandomArray<T>(T[] values)
+		{
+			return values[UnityEngine.Random.Range(0, values.Length)];
+		}
+
+		/// <summary>
+		/// listの中の要素をランダムで返す
+		/// </summary>
+		public static T RandomList<T>(List<T> values)
+		{
+			return values[UnityEngine.Random.Range(0, values.Count)];
+		}
+
+		/// <summary>
+		/// ランダムでtrueかfalseを返す
+		/// </summary>
+		public static bool BoolValue { get { return UnityEngine.Random.Range(0, 2) == 0; } }
+	}
+
+	/// <summary>
+	/// 独自のDebug
+	/// </summary>
+	public static class DebugLog
+	{
+		public static void ArrayLog<T>(T[] _self)
+		{
+			int i = 0;
+			foreach (var item in _self)
+			{
+				Debug.Log("[" + i + "]要素目    " + _self[i]);
+				i++;
+			}
+		}
+
+		public static void ArrayLog<T>(T[,] _self)
+		{
+			string str = "";
+			for (int i = 0; i < _self.GetLength(0); i++)
+			{
+				str += "[要素" + i + "列目]:";
+				for (int j = 0; j < _self.GetLength(1); j++)
+				{
+					str += _self[i, j] + ":";
+				}
+				Debug.Log(str);
+				str = "";
+			}
+		}
 	}
 }
 
