@@ -112,7 +112,7 @@ namespace SKLibrary
 		/// </summary>
 		/// <param name="_self"></param>
 		/// <returns></returns>
-		public static bool Switching(ref this bool _self)
+		public static bool Switching(this bool _self)
 		{
 			_self = _self ? false : true;
 			return _self;
