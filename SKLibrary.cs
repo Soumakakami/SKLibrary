@@ -4,25 +4,98 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using System.Linq;
+using System.Diagnostics;
 using UnityEngine;
 
+/// <summary>
+/// Unity用に拡張した機能です
+/// </summary>
 namespace SKLibrary
 {
+	//--------------------------------ここから下は拡張--------------------------------
+
 	public static class Extension
 	{
 		/// <summary>
 		/// 入れ替え
 		/// </summary>
-		/// <typeparam name="T">なんでいいよ</typeparam>
-		/// <param name="x">入れ替え</param>
-		/// <param name="y">入れ替え</param>
-		public static void Exchange<T>(ref T x, ref T y) where T : struct
+		public static void Exchange(ref sbyte x, ref sbyte y)
 		{
-			T z = x;
+			x ^= y;
+			y ^= x;
+			x ^= y;
+		}
+		public static void Exchange(ref byte x, ref byte y)
+		{
+			x ^= y;
+			y ^= x;
+			x ^= y;
+		}
+		public static void Exchange(ref short x, ref short y)
+		{
+			x ^= y;
+			y ^= x;
+			x ^= y;
+		}
+		public static void Exchange(ref ushort x, ref ushort y)
+		{
+			x ^= y;
+			y ^= x;
+			x ^= y;
+		}
+		public static void Exchange(ref int x, ref int y)
+		{
+			x ^= y;
+			y ^= x;
+			x ^= y;
+		}
+		public static void Exchange(ref uint x, ref uint y)
+		{
+			x ^= y;
+			y ^= x;
+			x ^= y;
+		}
+		public static void Exchange(ref long x, ref long y)
+		{
+			x ^= y;
+			y ^= x;
+			x ^= y;
+		}
+		public static void Exchange(ref ulong x, ref ulong y)
+		{
+			x ^= y;
+			y ^= x;
+			x ^= y;
+		}
+		public static void Exchange(ref char x, ref char y)
+		{
+			x ^= y;
+			y ^= x;
+			x ^= y;
+		}
+		public static void Exchange(ref float x, ref float y)
+		{
+			float z = x;
 			x = y;
 			y = z;
 		}
+		public static void Exchange(ref double x, ref double y)
+		{
+			double z = x;
+			x = y;
+			y = z;
+		}
+		public static void Exchange(ref string x, ref string y)
+		{
+			string z = x;
+			x = y;
+			y = z;
+
+		}
 	}
+	/// <summary>
+	/// boolの拡張
+	/// </summary>
 	public static class BoolExtension
 	{
 		/// <summary>
@@ -39,26 +112,57 @@ namespace SKLibrary
 		/// </summary>
 		/// <param name="_self"></param>
 		/// <returns></returns>
-		public static bool Switch(ref this bool _self)
+		public static bool Switching(ref this bool _self)
 		{
 			_self = _self ? false : true;
 			return _self;
 		}
 
 	}
-}
-
-/// <summary>
-/// Unity用に拡張した機能です
-/// </summary>
-namespace SKLibrary.Unity
-{
-	//--------------------------------ここから下は拡張--------------------------------
 	/// <summary>
-	/// ListをUnity用に拡張
+	/// 配列の拡張
+	/// </summary>
+	public static class ArrayExtension
+	{
+		/// <summary>
+		/// 配列の先頭を返します
+		/// </summary>
+		public static T First<T>(this T[] _self)
+		{
+			return _self.First();
+		}
+
+		/// <summary>
+		/// 配列の最後を返します
+		/// </summary>
+		public static T Last<T>(this T[] _self)
+		{
+			return _self.Last();
+		}
+	}
+
+	/// <summary>
+	/// Listを拡張
 	/// </summary>
 	public static class ListExtension
 	{
+
+		/// <summary>
+		/// Listの先頭を返します
+		/// </summary>
+		public static T First<T>(this List<T> _self)
+		{
+			return _self.First();
+		}
+
+		/// <summary>
+		/// Listの最後を返します
+		/// </summary>
+		public static T Last<T>(this List<T> _self)
+		{
+			return _self.Last();
+		}
+
 		/// <summary>
 		/// 要素の中にあるnullを削除する
 		/// </summary>
@@ -73,7 +177,6 @@ namespace SKLibrary.Unity
 				}
 			}
 		}
-
 		/// <summary>
 		/// 要素の中にnullがあればそこに割り振る場合によってはAddする
 		/// </summary>
@@ -142,7 +245,37 @@ namespace SKLibrary.Unity
 		{
 			return _self.GetComponent<T>() ?? _self.AddComponent<T>();
 		}
+		/// <summary>
+		/// 最上層の親オブジェクトを返します。親オブジェクトが存在しない場合自身を返す。
+		/// </summary>
+		/// <param name="_self"></param>
+		/// <returns></returns>
+		public static GameObject GetTopParent(this GameObject _self)
+		{
+			GameObject topParent = _self;
+			while (topParent.transform.parent == true)
+			{
+				topParent = topParent.transform.parent.gameObject;
+			}
+			return topParent;
+		}
+		/// <summary>
+		/// 深い階層まで子オブジェクトを名前で検索します
+		/// </summary>
+		public static GameObject FindDeep(this GameObject self, string name, bool includeInactive = false)
+		{
+			GameObject[] children = self.GetComponentsInChildren<GameObject>(includeInactive);
+			GameObject ret = null;
 
+			foreach (var gameObject in children)
+			{
+				if (gameObject.name == name)
+				{
+					ret = gameObject;
+				}
+			}
+			return ret;
+		}
 		/// <summary>
 		/// 全ての子オブジェクトを返します
 		/// </summary>
@@ -156,6 +289,166 @@ namespace SKLibrary.Unity
 				.Where(x => x != _self.transform)
 				.Select(x => x.gameObject)
 				.ToArray();
+		}
+
+		/// <summary>
+		/// X座標を設定します
+		/// </summary>
+		public static void SetPositionX(this GameObject self, float x)
+		{
+			self.transform.position = new Vector3(x,self.transform.position.y,self.transform.position.z);
+		}
+		/// <summary>
+		/// Y座標を設定します
+		/// </summary>
+		public static void SetPositionY(this GameObject self, float y)
+		{
+			self.transform.position = new Vector3(self.transform.position.x,y, self.transform.position.z);
+		}
+		/// <summary>
+		/// Z座標を設定します
+		/// </summary>
+		public static void SetPositionZ(this GameObject self, float z)
+		{
+			self.transform.position = new Vector3(self.transform.position.x, self.transform.position.y, z);
+		}
+
+		/// <summary>
+		/// X座標を加算します
+		/// </summary>
+        public static void AddPositionX(this GameObject self, float x)
+		{
+			self.transform.position += new Vector3(x, 0, 0);
+		}
+		/// <summary>
+		/// Y座標を加算します
+		/// </summary>
+        public static void AddPositionY(this GameObject self, float y)
+		{
+			self.transform.position += new Vector3(0, y, 0);
+		}
+		/// <summary>
+		/// Z座標を加算します
+		/// </summary>
+        public static void AddPositionZ(this GameObject self, float z)
+		{
+			self.transform.position += new Vector3(0, 0, z);
+		}
+
+		/// <summary>
+		/// 座標を0にリセットします
+		/// </summary>
+		/// <param name="self"></param>
+        public static void ResetPosition(this GameObject self)
+		{
+			self.transform.position = Vector3.zero;
+		}
+
+
+	}
+
+	/// <summary>
+	/// トランスフォームを拡張
+	/// </summary>
+	public static class TransformExtension
+	{
+		/// <summary>
+		/// 最上層の親オブジェクトのTransformを返します。親オブジェクトが存在しない場合自身を返す。
+		/// </summary>
+		/// <param name="_self"></param>
+		/// <returns></returns>
+        public static Transform GetTopParent(this Transform _self)
+		{
+			Transform topParent = _self;
+			while (topParent.parent == true)
+			{
+				topParent = topParent.parent;
+			}
+			return topParent;
+		}
+		/// <summary>
+		/// 深い階層まで子オブジェクトを名前で検索します
+		/// </summary>
+        public static Transform FindDeep(this Transform self, string name, bool includeInactive = false)
+		{
+			Transform[] children = self.GetComponentsInChildren<Transform>(includeInactive);
+			Transform ret = null;
+
+			foreach (var gameObject in children)
+			{
+				if (gameObject.name == name)
+				{
+					ret = gameObject;
+				}
+			}
+			return ret;
+		}
+		/// <summary>
+		/// 全ての子オブジェクトを返します
+		/// </summary>
+		/// <param name="self">自身</param>
+		/// <param name="includeInactive">非アクティブのオブジェクトの取得するか</param>
+		/// <returns></returns>
+        public static Transform[] GetChildren(this Transform _self, bool includeInactive = false)
+		{
+			return _self
+				.GetComponentsInChildren<Transform>(includeInactive)
+				.Where(x => x != _self.transform)
+				.Select(x => x.transform)
+				.ToArray();
+		}
+
+		/// <summary>
+		/// X座標を設定します
+		/// </summary>
+        public static void SetPositionX(this Transform self, float x)
+		{
+			self.transform.position = new Vector3(x, self.transform.position.y, self.transform.position.z);
+		}
+		/// <summary>
+		/// Y座標を設定します
+		/// </summary>
+        public static void SetPositionY(this Transform self, float y)
+		{
+			self.transform.position = new Vector3(self.transform.position.x, y, self.transform.position.z);
+		}
+		/// <summary>
+		/// Z座標を設定します
+		/// </summary>
+        public static void SetPositionZ(this Transform self, float z)
+		{
+			self.transform.position = new Vector3(self.transform.position.x, self.transform.position.y, z);
+		}
+
+		/// <summary>
+		/// X座標を加算します
+		/// </summary>
+        public static void AddPositionX(this Transform self, float x)
+		{
+			self.transform.position += new Vector3(x,0,0);
+		}
+		/// <summary>
+		/// Y座標設定します
+		/// </summary>
+        public static void AddPositionY(this Transform self, float y)
+		{
+			self.transform.position += new Vector3(0, y, 0);
+		}
+		/// <summary>
+		/// Z座標を加算します
+		/// </summary>
+        public static void AddPositionZ(this Transform self, float z)
+		{
+			self.transform.position += new Vector3(0, 0, z);
+		}
+
+		/// <summary>
+		/// 座標を0にリセットします
+		/// </summary>
+		/// <param name="self"></param>
+        public static void ResetPosition(this Transform self)
+		{
+			self.transform.position = Vector3.zero;
 		}
 	}
 
@@ -208,11 +501,26 @@ namespace SKLibrary.Unity
 	//--------------------------------ここから上は拡張--------------------------------
 
 	/// <summary>
-	/// 独自のGameObject
+	///  独自のGameObject
 	/// </summary>
 	public static class GameObjectUtils
 	{
-
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="name">含めたい文字列</param>
+		/// <returns></returns>
+		public static GameObject[] FindContainsName(string name)
+		{
+			//一度すべてのオブジェクトを取得
+			Transform[] gameObjects=GameObject.FindObjectsOfType<Transform>();
+			//取得したオブジェクトの名前の中に指定した文字列が含まれていた場合配列に格納
+			GameObject[] ret = gameObjects
+									.Where(x => 0 <= x.name.IndexOf(name))
+									.Select(x => x.gameObject)
+									.ToArray();
+			return ret;
+		}
 	}
 
 	/// <summary>
@@ -245,18 +553,153 @@ namespace SKLibrary.Unity
 	/// <summary>
 	/// 独自のDebug
 	/// </summary>
-	public static class DebugLog
+	public static class DebugUtils
 	{
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// ログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		public static void Log(string message)
+		{
+			UnityEngine.Debug.Log(message);
+		}
+
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// ログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		/// <param name="context">メッセージが適用されるオブジェクト</param>
+		public static void Log(object message, UnityEngine.Object context)
+		{
+			UnityEngine.Debug.Log(message, context);
+		}
+
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// サイズしてログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		/// <param name="size">文字の大きさ</param>
+		/// 
+		public static void Log(string message,float size)
+		{
+			UnityEngine.Debug.Log("<size="+size+">" + message+"</size>");
+		}
+
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// サイズしてログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		/// <param name="size">文字の大きさ</param>
+		/// <param name="context">メッセージが適用されるオブジェクト</param>
+		public static void Log(string message, float size, UnityEngine.Object context)
+		{
+			UnityEngine.Debug.Log("<size=" + size + ">" + message + "</size>",context);
+		}
+
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// 色を変更してログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		/// <param name="color">文字の色</param>
+		public static void Log(string message, Color color)
+		{
+			UnityEngine.Debug.Log("<color=#" + ColorUtility.ToHtmlStringRGB(color) + "> "+ message + "</color>");
+		}
+
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// 色を変更してログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		/// <param name="color">文字の色</param>
+		/// <param name="context">メッセージが適用されるオブジェクト</param>
+		public static void Log(string message, Color color, UnityEngine.Object context)
+		{
+			UnityEngine.Debug.Log("<color=#" + ColorUtility.ToHtmlStringRGB(color) + "> " + message + "</color>", context);
+		}
+
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// 色を変更してログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		/// <param name="size">文字の大きさ</param>
+		/// <param name="color">文字の色</param>
+		public static void Log(string message, float size,Color color)
+		{
+			UnityEngine.Debug.Log("<color=#"+ ColorUtility.ToHtmlStringRGB(color) + "><size=" + size + ">" + message + "</size></color>");
+		}
+
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// 色を変更してログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		/// <param name="size">文字の大きさ</param>
+		/// <param name="color">文字の色</param>
+		/// <param name="context">メッセージが適用されるオブジェクト</param>
+		public static void Log(string message, float size, Color color, UnityEngine.Object context)
+		{
+			UnityEngine.Debug.Log("<color=#" + ColorUtility.ToHtmlStringRGB(color) + "><size=" + size + ">" + message + "</size></color>", context);
+		}
+
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// エラーログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		public static void LogError(string message)
+		{
+			UnityEngine.Debug.LogError(message);
+		}
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// エラーログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		public static void LogError(string message, UnityEngine.Object context)
+		{
+			UnityEngine.Debug.LogError(message,context);
+		}
+
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// 警告ログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		public static void LogWarning(string message)
+		{
+			UnityEngine.Debug.LogWarning(message);
+		}
+		[Conditional("UNITY_EDITOR")]
+		/// <summary>
+		/// 警告ログを出力します
+		/// </summary>
+		/// <param name="message">メッセージ</param>
+		public static void LogWarning(string message, UnityEngine.Object context)
+		{
+			UnityEngine.Debug.LogWarning(message,context);
+		}
+
+		/// <summary>
+		/// 配列のログを出します
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="_self"></param>
 		public static void ArrayLog<T>(T[] _self)
 		{
 			int i = 0;
 			foreach (var item in _self)
 			{
-				Debug.Log("[" + i + "]要素目    " + _self[i]);
+				UnityEngine.Debug.Log("[" + i + "]要素目    " + _self[i]);
 				i++;
 			}
 		}
-
 		public static void ArrayLog<T>(T[,] _self)
 		{
 			string str = "";
@@ -267,7 +710,7 @@ namespace SKLibrary.Unity
 				{
 					str += _self[i, j] + ":";
 				}
-				Debug.Log(str);
+				UnityEngine.Debug.Log(str);
 				str = "";
 			}
 		}
@@ -380,12 +823,12 @@ namespace SKLibrary.SaveAndLoad
 			//Saveディレクトリまたはバイナリファイルが存在しない場合
 			if (!Directory.Exists(savePath))
 			{
-				Debug.LogError("ディレクトリが見つかりませんでした");
+				UnityEngine.Debug.LogError("ディレクトリが見つかりませんでした");
 				return null;
 			}
 			if (!File.Exists(saveFileName))
 			{
-				Debug.LogError("ファイルが見つかりませんでした");
+				UnityEngine.Debug.LogError("ファイルが見つかりませんでした");
 				return null;
 			}
 
@@ -509,12 +952,12 @@ namespace SKLibrary.SaveAndLoad
 			//Saveディレクトリまたはバイナリファイルが存在しない場合
 			if (!Directory.Exists(savePath))
 			{
-				Debug.LogError("ディレクトリが見つかりませんでした");
+				UnityEngine.Debug.LogError("ディレクトリが見つかりませんでした");
 				return null;
 			}
 			if (!File.Exists(saveFileName))
 			{
-				Debug.LogError("ファイルが見つかりませんでした");
+				UnityEngine.Debug.LogError("ファイルが見つかりませんでした");
 				return null;
 			}
 
