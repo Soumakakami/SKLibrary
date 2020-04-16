@@ -129,7 +129,7 @@ namespace SKLibrary
 		/// </summary>
 		public static T First<T>(this T[] _self)
 		{
-			return _self.First();
+			return _self[0];
 		}
 
 		/// <summary>
@@ -137,7 +137,7 @@ namespace SKLibrary
 		/// </summary>
 		public static T Last<T>(this T[] _self)
 		{
-			return _self.Last();
+			return _self[_self.Length];
 		}
 	}
 
@@ -152,7 +152,7 @@ namespace SKLibrary
 		/// </summary>
 		public static T First<T>(this List<T> _self)
 		{
-			return _self.First();
+			return _self[0];
 		}
 
 		/// <summary>
@@ -160,7 +160,7 @@ namespace SKLibrary
 		/// </summary>
 		public static T Last<T>(this List<T> _self)
 		{
-			return _self.Last();
+			return _self[_self.Count];
 		}
 
 		/// <summary>
