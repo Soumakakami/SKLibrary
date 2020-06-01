@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
@@ -6,6 +7,7 @@ using System.Text;
 using System.Linq;
 using System.Diagnostics;
 using UnityEngine;
+
 
 /// <summary>
 /// Unity用に拡張した機能です
@@ -104,7 +106,7 @@ namespace SKLibrary
 		/// <returns></returns>
 		public static bool RandomBool()
 		{
-			return Random.Range(0, 2) == 0 ? true : false;
+			return UnityEngine.Random.Range(0, 2) == 0 ? true : false;
 		}
 
 		/// <summary>
@@ -138,6 +140,125 @@ namespace SKLibrary
 		public static T Last<T>(this T[] _self)
 		{
 			return _self[_self.Length];
+		}
+
+		/// <summary>
+		/// クイックソート
+		/// </summary>
+		/// <param name="array">ソートする配列</param>
+		/// <param name="left">ソート範囲の最初のインデックス</param>
+		/// <param name="right">ソート範囲の最後のインデックス</param>
+		/// <param name="ascending"></param>
+		public static void QuickSort(int[] array, int left, int right, bool ascending = true)
+		{
+
+			// 交換回数を保持する変数です。
+			int swapNum = 0;
+			// ソートする範囲が1要素以下であれば処理をしない
+			if (left >= right)
+			{
+				return;
+			}
+			// 左から確認していくインデックスを格納します。
+			int i = left;
+
+			// 右から確認していくインデックスを格納します。
+			int j = right;
+
+			// ピボット選択に使う配列の中央のインデックスを計算します。
+			int mid = (left + right) / 2;
+
+			// ピボットを決定します。
+			int pivot = GetMediumValue(array[i], array[mid], array[j]);
+
+			while (true)
+			{
+				if (ascending)
+				{
+					// ピボットの値以上の値を持つ要素を左から確認します。
+					while (array[i] < pivot)
+					{
+						i++;
+					}
+
+					// ピボットの値以下の値を持つ要素を右から確認します。
+					while (array[j] > pivot)
+					{
+						j--;
+					}
+				}
+				else
+				{
+					// ピボットの値以上の値を持つ要素を左から確認します。
+					while (array[i] > pivot)
+					{
+						i++;
+					}
+
+					// ピボットの値以下の値を持つ要素を右から確認します。
+					while (array[j] < pivot)
+					{
+						j--;
+					}
+				}
+
+
+				// 左から確認したインデックスが、右から確認したインデックス以上であれば外側のwhileループを抜けます。
+				if (i >= j)
+				{
+					break;
+				}
+
+				// そうでなければ、見つけた要素を交換します。
+				Extension.Exchange(ref array[j],ref array[i]);
+
+				// 交換を行なった要素の次の要素にインデックスを進めます。
+				i++;
+				j--;
+
+				// 交換回数を増やします。
+				swapNum++;
+			}
+			// 左側の範囲について再帰的にソートを行います。
+			QuickSort(array, left, i - 1, ascending);
+
+			// 右側の範囲について再帰的にソートを行います。
+			QuickSort(array, j + 1, right,ascending);
+		}
+
+		private static int GetMediumValue(int top, int mid, int bottom)
+		{
+			 //配列の最初が中央値より低い時
+			if (top < mid)
+			{
+				if (mid < bottom)
+				{
+					return mid;
+				}
+				else if (bottom < top)
+				{
+					return top;
+				}
+				else
+				{
+					return bottom;
+				}
+			}
+			else
+			{
+				if (bottom < mid)
+				{
+					return mid;
+				}
+				else if (top < bottom)
+				{
+					return top;
+				}
+				else
+				{
+					return bottom;
+				}
+			}
 		}
 	}
 
@@ -501,15 +622,15 @@ namespace SKLibrary
 	//--------------------------------ここから上は拡張--------------------------------
 
 	/// <summary>
-	///  独自のGameObject
+	///  新しいGameObject
 	/// </summary>
 	public static class GameObjectUtils
 	{
 		/// <summary>
-		/// 
+		/// 指定した文字列が含まれているオブジェクトを取得
 		/// </summary>
 		/// <param name="name">含めたい文字列</param>
-		/// <returns></returns>
+		/// <returns>取得したオブジェクトの配列</returns>
 		public static GameObject[] FindContainsName(string name)
 		{
 			//一度すべてのオブジェクトを取得
@@ -524,7 +645,7 @@ namespace SKLibrary
 	}
 
 	/// <summary>
-	/// 独自のRandom
+	/// 新しいRandom
 	/// </summary>
 	public static class RandomUtils
 	{
@@ -551,7 +672,7 @@ namespace SKLibrary
 	}
 
 	/// <summary>
-	/// 独自のDebug
+	///新しいDebug
 	/// </summary>
 	public static class DebugUtils
 	{
