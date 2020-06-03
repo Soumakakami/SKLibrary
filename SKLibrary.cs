@@ -21,79 +21,86 @@ namespace SKLibrary
 		/// <summary>
 		/// 入れ替え
 		/// </summary>
-		public static void Exchange(ref sbyte x, ref sbyte y)
+		public static void Swap(ref sbyte x, ref sbyte y)
 		{
 			x ^= y;
 			y ^= x;
 			x ^= y;
 		}
-		public static void Exchange(ref byte x, ref byte y)
+		public static void Swap(ref byte x, ref byte y)
 		{
 			x ^= y;
 			y ^= x;
 			x ^= y;
 		}
-		public static void Exchange(ref short x, ref short y)
+		public static void Swap(ref short x, ref short y)
 		{
 			x ^= y;
 			y ^= x;
 			x ^= y;
 		}
-		public static void Exchange(ref ushort x, ref ushort y)
+		public static void Swap(ref ushort x, ref ushort y)
 		{
 			x ^= y;
 			y ^= x;
 			x ^= y;
 		}
-		public static void Exchange(ref int x, ref int y)
+		public static void Swap(ref int x, ref int y)
 		{
 			x ^= y;
 			y ^= x;
 			x ^= y;
 		}
-		public static void Exchange(ref uint x, ref uint y)
+		public static void Swap(ref uint x, ref uint y)
 		{
 			x ^= y;
 			y ^= x;
 			x ^= y;
 		}
-		public static void Exchange(ref long x, ref long y)
+		public static void Swap(ref long x, ref long y)
 		{
 			x ^= y;
 			y ^= x;
 			x ^= y;
 		}
-		public static void Exchange(ref ulong x, ref ulong y)
+		public static void Swap(ref ulong x, ref ulong y)
 		{
 			x ^= y;
 			y ^= x;
 			x ^= y;
 		}
-		public static void Exchange(ref char x, ref char y)
+		public static void Swap(ref char x, ref char y)
 		{
 			x ^= y;
 			y ^= x;
 			x ^= y;
 		}
-		public static void Exchange(ref float x, ref float y)
+		public static void Swap(ref float x, ref float y)
 		{
 			float z = x;
 			x = y;
 			y = z;
 		}
-		public static void Exchange(ref double x, ref double y)
+		public static void Swap(ref double x, ref double y)
 		{
 			double z = x;
 			x = y;
 			y = z;
 		}
-		public static void Exchange(ref string x, ref string y)
+		public static void Swap(ref string x, ref string y)
 		{
 			string z = x;
 			x = y;
 			y = z;
 
 		}
+		public static void Swap<T>(ref T x, ref T y)where T:UnityEngine.Object
+		{
+			T z = x;
+			x = y;
+			y = z;
+		}
+
 	}
 	/// <summary>
 	/// boolの拡張
