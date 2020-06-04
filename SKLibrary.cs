@@ -16,6 +16,9 @@ namespace SKLibrary
 {
 	//--------------------------------ここから下は拡張--------------------------------
 
+	/// <summary>
+	/// 特に分別しない拡張
+	/// </summary>
 	public static class Extension
 	{
 		/// <summary>
@@ -107,14 +110,6 @@ namespace SKLibrary
 	/// </summary>
 	public static class BoolExtension
 	{
-		/// <summary>
-		/// ランダムなbool値を返します。
-		/// </summary>
-		/// <returns></returns>
-		public static bool RandomBool()
-		{
-			return UnityEngine.Random.Range(0, 2) == 0 ? true : false;
-		}
 
 		/// <summary>
 		/// boolのtrue or falseを切り替える
@@ -217,7 +212,7 @@ namespace SKLibrary
 				}
 
 				// そうでなければ、見つけた要素を交換します。
-				Extension.Exchange(ref array[j],ref array[i]);
+				Extension.Swap(ref array[j],ref array[i]);
 
 				// 交換を行なった要素の次の要素にインデックスを進めます。
 				i++;
@@ -390,7 +385,7 @@ namespace SKLibrary
 		/// <summary>
 		/// 深い階層まで子オブジェクトを名前で検索します
 		/// </summary>
-		public static GameObject FindDeep(this GameObject self, string name, bool includeInactive = false)
+		public static GameObject GetTopParent(this GameObject self, string name, bool includeInactive = false)
 		{
 			GameObject[] children = self.GetComponentsInChildren<GameObject>(includeInactive);
 			GameObject ret = null;
@@ -414,7 +409,7 @@ namespace SKLibrary
 		{
 			return _self
 				.GetComponentsInChildren<GameObject>(includeInactive)
-				.Where(x => x != _self.transform)
+				.Where(x => x != _self.gameObject)
 				.Select(x => x.gameObject)
 				.ToArray();
 		}
@@ -620,6 +615,11 @@ namespace SKLibrary
 	/// </summary>
 	public static class Texture2DExtension
 	{
+		/// <summary>
+		/// Texture2DからSpriteを作成
+		/// </summary>
+		/// <param name="tex2D"></param>
+		/// <returns></returns>
 		public static Sprite CreateSprite(this Texture2D tex2D)
 		{
 			Sprite sprite = Sprite.Create(tex2D, new Rect(0f, 0f, tex2D.width, tex2D.height), new Vector2(0.5f, 0.5f), 100f);
@@ -992,8 +992,8 @@ namespace SKLibrary.SaveAndLoad
 		/// 暗号化
 		/// </summary>
 		public const string savePath = "./date.binary";
-		private const string _password = "passwordstring";
-		private const string _salt = "saltstring";
+		public static string _password = "passwordstring";
+		public static string _salt = "saltstring";
 		static private RijndaelManaged _rijindeal;
 		
 		/// <summary>
