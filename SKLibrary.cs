@@ -21,6 +21,7 @@ namespace SKLibrary
 	/// </summary>
 	public static class Extension
 	{
+		#region 入れ替え処理
 		/// <summary>
 		/// 入れ替え
 		/// </summary>
@@ -97,12 +98,7 @@ namespace SKLibrary
 			y = z;
 
 		}
-		public static void Swap<T>(ref T x, ref T y)where T:UnityEngine.Object
-		{
-			T z = x;
-			x = y;
-			y = z;
-		}
+		#endregion
 
 	}
 	/// <summary>
@@ -461,12 +457,64 @@ namespace SKLibrary
 		/// <summary>
 		/// 座標を0にリセットします
 		/// </summary>
-		/// <param name="self"></param>
         public static void ResetPosition(this GameObject self)
 		{
 			self.transform.position = Vector3.zero;
 		}
 
+		/// <summary>
+		/// Xサイズを代入します
+		/// </summary>
+		/// <param name="x">代入する値</param>
+		public static void SetLocalScaleX(this GameObject _self, float x)
+		{
+			_self.transform.localScale = new Vector3(x, _self.transform.localScale.y, _self.transform.localScale.z);
+		}
+
+		/// <summary>
+		/// Yサイズを代入します
+		/// </summary>
+		/// <param name="y">代入する値</param>
+		public static void SetLocalScaleY(this GameObject _self, float y)
+		{
+			_self.transform.localScale = new Vector3(_self.transform.localScale.x, y, _self.transform.localScale.z);
+		}
+
+		/// <summary>
+		/// Zサイズを代入します
+		/// </summary>
+		/// <param name="z">代入する値</param>
+		public static void SetLocalScaleZ(this GameObject _self, float z)
+		{
+			_self.transform.localScale = new Vector3(_self.transform.localScale.x, _self.transform.localScale.y, z);
+		}
+
+		/// <summary>
+		/// Xサイズに加算します
+		/// </summary>
+		/// <param name="x">加算する値</param>
+		public static void AddLocalScaleX(this GameObject _self, float x)
+		{
+			_self.transform.localScale += new Vector3(x, 0, 0);
+		}
+
+		/// <summary>
+		/// Yサイズに加算します
+		/// </summary>
+		/// <param name="y">加算する値</param>
+		public static void AddLocalScaleY(this GameObject _self, float y)
+		{
+			_self.transform.localScale += new Vector3(0, y, 0);
+		}
+
+		/// <summary>
+		/// Zサイズに加算します
+		/// </summary>
+		/// <param name="z">加算する値</param>
+		public static void AddLocalScaleZ(this GameObject _self, float z)
+		{
+			_self.transform.localScale += new Vector3(0, 0, z);
+		}
 
 	}
 
