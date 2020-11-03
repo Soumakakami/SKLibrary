@@ -7,7 +7,7 @@ using System.Text;
 using System.Linq;
 using System.Diagnostics;
 using UnityEngine;
-
+using UnityEngine.AI;
 
 /// <summary>
 /// Unity用に拡張した機能です
@@ -727,6 +727,18 @@ namespace SKLibrary
 			return sprite;
 		}
 	}
+
+	public static class NavMeshAgentExtension
+	{
+		public static bool IsRouteReach(this NavMeshAgent _self,Transform _target)
+		{
+			NavMeshPath path = new NavMeshPath();
+			NavMesh.CalculatePath(_self.transform.position, _target.transform.position, NavMesh.AllAreas, path);
+
+			return (Vector3.Distance(_target.transform.position, path.corners[path.corners.Length - 1]) > 0.5f) ? false : true;
+		}
+	}
+
 	//--------------------------------ここから上は拡張--------------------------------
 
 	/// <summary>
